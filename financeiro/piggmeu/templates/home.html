@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 PiggMeu - Controle Financeiro</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>💰 PiggMeu - Controle Financeiro</h1>
+        <Form method="POST">
+            {% csrf_token %}
+            <input type="text" name="descricao" placeholder="💭 Descrição da transação" required>
+            <input type="number" step="0.01" name="valor" placeholder="💵 Valor (R$)" required>
+            <select name="tipo" required>
+                <option value="">🏷️ Selecione o tipo</option>
+                <option value="R">💚 Receita</option>
+                <option value="D">💸 Despesa</option>
+            </select>
+            <button type="submit">➕ Adicionar Transação</button>
+        </Form>
+        <h2>📊 Minhas Transações</h2>
+        <table>
+            <tr>
+                <th>💭 Descrição</th>
+                <th>💰 Valor (R$)</th>
+                <th>🏷️ Tipo</th>
+                <th>⚙️ Ações</th>
+            </tr>
+            {% for t in transacoes %}
+            <tr>
+                <td>{{ t.descricao }}</td>
+                <td>R$ {{ t.valor|floatformat:2 }}</td>
+                <td>
+                    {% if t.tipo == 'R' %}
+                        <span style="color: #27ae60; font-weight: bold;">💚 {{ t.get_tipo_display }}</span>
+                    {% else %}
+                        <span style="color: #e74c3c; font-weight: bold;">💸 {{ t.get_tipo_display }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <Form method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta transação?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_id" value="{{ t.id }}">
+                        <button type="submit" class="btn-delete">🗑️ Excluir</button>
+                    </Form>
+                </td> 
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: #7f8c8d; font-style: italic;">
+                    📝 Nenhuma transação registrada ainda.<br>
+                    <small>Adicione sua primeira transação usando o formulário acima!</small>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div class="resumo">
+            <p>💚 <strong>Receitas:</strong><br>R$ {{ total_receitas|floatformat:2 }}</p>
+            <p>💸 <strong>Despesas:</strong><br>R$ {{ total_despesas|floatformat:2 }}</p>
+            <p>💰 <strong>Saldo:</strong><br>
+                {% if saldo >= 0 %}
+                    <span style="color: #27ae60;">R$ {{ saldo|floatformat:2 }}</span>
+                {% else %}
+                    <span style="color: #e74c3c;">R$ {{ saldo|floatformat:2 }}</span>
+                {% endif %}
+            </p>
+        </div>
+
+
+    </div>
+        
+</body>
+
+
+</html>
